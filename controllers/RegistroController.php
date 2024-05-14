@@ -29,9 +29,6 @@ class RegistroController {
         } 
         if(isset($registro) && $registro->paquete_id === "1") {
             header('Location: /finalizar-registro/conferencias');
-            return;
-        } else {
-            header('Location: /');
         }
 
         $router->render('registro/crear', [
@@ -127,28 +124,28 @@ class RegistroController {
         }
     }
 
-    public static function conferencias (Router $router) {
+    public static function conferencias(Router $router) {
+ 
         if(!is_auth()) {
             header('Location: /login');
             return;
-        }
+        }        
+ 
         // Validar que el usuario tenga el plan presencial
         $usuario_id = $_SESSION['id'];
         $registro = Registro::where('usuario_id', $usuario_id);
-
+        $registroFinalizado = EventosRegistros::where('registro_id', $registro->id);
+ 
         if(isset($registro) && $registro->paquete_id === "2") {
             header('Location: /boleto?id=' . urlencode($registro->token));
             return;
-        }
-
-        if($registro->paquete_id !== "1") {
-            header('Location: /');
+        } 
+        if(isset($registroFinalizado)) {
+            header('Location: /boleto?id=' . urlencode($registro->token));
             return;
         }
-
-        // Redireccionar a boleto virtual en caso de haber finalizado su registro
-        if(isset($registro->regalo_id) && $registro->paquete_id === "1") {
-            header('Location: /boleto?id=' . urlencode($registro->token));
+        if($registro->paquete_id !== "1") {
+            header('Location: /');
             return;
         }
 
